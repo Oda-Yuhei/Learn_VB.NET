@@ -1,3 +1,5 @@
+Imports System.Collections.Generic
+
 Public Class Address
 	Public Property Name() As String
 	Public Property Kana() As String
@@ -18,7 +20,7 @@ Public Class Address
 End Class
 
 Public Class AddressDao
-	Private Const FILE_NAME = "Address.csv"
+	Private Const FILE_NAME = "dummy.cgi"
 	Public ReadOnly Property Addresses() As List(Of Address)
 	Public Sub New()
 		Addresses = LoadFile()
@@ -29,8 +31,8 @@ Public Class AddressDao
 			Console.WriteLine(i & "," & Addresses.Item(i).ToString)
 		Next
 	End Sub
-	Function LoadFile() As List(Address)
-		Dim addresses As New List(Address)
+	Function LoadFile() As List(Of Address)
+		Dim addresses As New List(Of Address)
 		Using reader As New IO.StreamReader(FILE_NAME)
 			While True
 				Dim line As String = reader.ReadLine()
@@ -72,17 +74,16 @@ Public Class AddressLogic
 					Exit Do
 				Case Else
 					Console.WriteLine("入力が間違えていますもう一度入力してください")
-				End Select
-			Loop While True
-			Return result
+			End Select
 		Loop While True
 		Return result
+
 	End Function
 	Private Function ShowList()
 		_addressDao.ShowList()
 		Dim result As Integer
 		Do
-			Console.Write("0:メインメニューへ,編集:列番号:"
+			Console.Write("0:メインメニューへ,編集:列番号:")
 			Dim input As String =Console.ReadLine()
 			If IsNumeric(input) Then
 				result = CInt(input)
@@ -113,37 +114,91 @@ Public Class AddressLogic
 					Delete(address)
 				Case Else
 					Console.WriteLine("一覧に戻ります")
-			ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+                End Select
+            Else 
+                Console.WriteLine("その番号は見つかりませんでした")
+        End If
+    End Sub
 
-		Dim kana As String = Console.ReadLine()
-		If kana Is Nothing Then
-			Console.WriteLine("かなが未入力なので登録をキャンセルしました")
-			Return
-		End If
+    Private Sub Modify(address As Address)
+        Console.WriteLine("変更を処理します（各項目未入力は変更しない）")
+        Console.Write($"名前({address.Name}):")
+        Dim name As String = Console.ReadLine()
+        If Not name = address.Name AndAlso name IsNot Nothing Then
+            address.Name = name
+        End If
 
-		Console.Write("メール：")
-		Dim mail As String _ Console.ReadLine()
-		If mail Is Nothing Then
-			Console.WriteLine("メールが未入力なので登録をキャンセルしました")
-			Return
-		End If
+        Console.Write($"かな（{address.Kana}）:")
+        Dim kana As String = Console.ReadLine()
+        If Not kana = address.Kana AndAlso kana IsNot Nothing Then
+            address.Kana = kana
+        End If
 
-		Console.Write("携帯番号：")
-		Dim phone As String = Console.ReadLine()
-		If phone Is Nothing Then
-			Console.WriteLine("携帯電話番号が未入力なので登録をキャンセルしました")
-			Return
-		End If
+        Console.WriteLine($"携帯電話（{address.Mail}）:")
+        Dim phone As String = Console.ReadLine()
+        If Not phone = address.Mail AndAlso phone IsNot Nothing Then
+            address.Phone = phone
+        End If
+        Console.WriteLine("変更処理が完了しました。")
 
-		Console.Write("登録しますよろしいでしょうか[y/y以外]:")
-		If "y" = Console.ReadLine() Then
-			_addressDao.Addresses.Add(New Address(name,kana,mail,phone))
-			Console.WriteLine("登録しました")
-		Else
-			Console.WriteLine("登録をキャンセルしました")
+    End Sub
+    Private Sub Delete(address As Address)
+        Console.Write("削除しますよろしいでしょうか[y/y以外]：")
+        If "y" = Console.ReadLine() Then
+            _addressDao.Addresses.Remove(address)
+            Console.WriteLine("削除しました")
+        Else
+            Console.WriteLine("削除をキャンセルしました")
+        End If
+    End Sub
+    Private Sub SaveFile()
+        Console.Write("ファイルに保存しますよろしいでしょうか[y/y以外]：")
+        If "y" = Console.ReadLine() Then
+            _addressDao.SaveFile()
+            Console.WriteLine("ファイルに保存しました")
+        Else
+            Console.WriteLine("保存をキャンセルしました")
+        End If
+    End Sub
+    Private Sub AddAddress()
+        Console.WriteLine("レコード追加")
+        Console.Write("名前　　：")
+        Dim name As String = Console.ReadLine()
+        If name Is Nothing Then
+            Console.WriteLine("名前が未入力なので登録をキャンセルしました")
+            Return
+        End If
 
-		End If
-	end Sub
+        Console.Write("かな　　：")
+        Dim kana As String = Console.ReadLine()
+        If kana Is Nothing Then
+            Console.WriteLine("かなが未入力なので登録をキャンセルしました")
+            Return
+        End If
+
+        Console.Write("メール：")
+        Dim mail As String = Console.ReadLine()
+        If mail Is Nothing Then
+            Console.WriteLine("メールが未入力なので登録をキャンセルしました")
+            Return
+        End If
+
+        Console.Write("携帯番号：")
+        Dim phone As String = Console.ReadLine()
+        If phone Is Nothing Then
+            Console.WriteLine("携帯電話番号が未入力なので登録をキャンセルしました")
+            Return
+        End If
+
+        Console.Write("登録しますよろしいでしょうか[y/y以外]:")
+        If "y" = Console.ReadLine() Then
+            _addressDao.Addresses.Add(New Address(name,kana,mail,phone))
+            Console.WriteLine("登録しました")
+        Else
+            Console.WriteLine("登録をキャンセルしました")
+
+        End If
+    end Sub
 	Public Sub Start()
 		Dim input As Integer
 		Do
@@ -154,7 +209,7 @@ Public Class AddressLogic
 					Do
 						subInput = ShowList()
 						If subInput <> 0 Then
-							EditMenu
+							EditMenu(input)
 						End If
 					Loop Until subInput = 0
 				Case 2
@@ -167,9 +222,7 @@ End Class
 Module Program
 	Sub main()
 		Dim logic As New AddressLogic()
-		ligic.Start
+		logic.Start
 	End Sub
 End Module
 
-
-End Class
