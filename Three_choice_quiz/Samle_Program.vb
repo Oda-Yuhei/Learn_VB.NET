@@ -35,6 +35,7 @@ Public Class QuizDao
             Util.Shuffle(quizzes)
             quizzes.RemoveRange(QUIZ_COUNT, quizzes.Count - QUIZ_COUNT)
             Dim quiz_ids As String = String.Join(",", quizzes.Select(Function(q) q.Id))
+            'é–¢æ•°å‹ãƒªãƒ³ã‚¯ï¼ˆãƒ©ãƒ ãƒ€å¼ï¼‰
             command = New NpgsqlCommand($"SELECT * FROM choice WHERE quiz_id IN ({quiz_ids});", con)
             reader = command.ExecuteReader()
             While reader.Read()
@@ -45,6 +46,7 @@ Public Class QuizDao
             command.Dispose()
             For Each quiz As Quiz In quizzes
                 quiz.Choices = New List(Of Choice)(choices.Where(Function(c) c.Quiz_id = quiz.Id))
+                'å•é¡Œã¨é¸æŠè‚¢ã®é€£çµ
 
             Next
         End Using
@@ -109,12 +111,12 @@ Public Class Quiz
             Console.WriteLine($"[{i}],{Choices(i - 1).Choise}")
 
         Next
-        Console.Write($"‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢[1 - {Choices.Count}] : ")
+        Console.Write($"é¸æŠã—ã¦ãã ã•ã„[1 - {Choices.Count}] : ")
 
     End Sub
     Public Function IsCorrect(index As Integer) As Boolean
         If index < 1 AndAlso index > Choices.Count Then
-            Throw New IndexOutOfRangeException("‰ğ“š‚Ì“ü—Í‚ª³‚µ‚­‚È‚¢")
+            Throw New IndexOutOfRangeException("è§£ç­”ã®å…¥åŠ›ãŒæ­£ã—ããªã„")
         End If
         Return Choices(index - 1).Is_correct
     End Function
@@ -127,12 +129,12 @@ Public Class QuizLogic
         genres = quizDao.Getgenres()
     End Sub
     Public Function SelectGenre() As Integer
-        Console.WriteLine("‘I‘ğƒNƒCƒY")
+        Console.WriteLine("é¸æŠã‚¯ã‚¤ã‚º")
         For Each genre As Genre In genres
             Console.WriteLine(genre.ToString())
 
         Next
-        Console.Write("ƒWƒƒƒ“ƒ‹‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢ : ")
+        Console.Write("ã‚¸ãƒ£ãƒ³ãƒ«ã‚’é¸æŠã—ã¦ãã ã•ã„ : ")
         Return CInt(Console.ReadLine())
 
     End Function
@@ -145,13 +147,13 @@ Public Class QuizLogic
                 .ShowQuestion()
                 If .IsCorrect(CInt(Console.ReadLine())) Then
                     correctCount += 1
-                    Console.WriteLine("³‰ğ")
+                    Console.WriteLine("æ­£è§£")
                 Else
-                    Console.WriteLine("•s³‰ğ")
+                    Console.WriteLine("ä¸æ­£è§£")
                 End If
             End With
         Next
-        Console.WriteLine($"Œ‹‰Ê”­•\ {quizzes.Count} –â’† {correctCount} –â³‰ğ")
+        Console.WriteLine($"çµæœç™ºè¡¨ {quizzes.Count} å•ä¸­ {correctCount} å•æ­£è§£")
     End Sub
 End Class
 Module Util
